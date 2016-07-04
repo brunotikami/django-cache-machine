@@ -111,11 +111,14 @@ class CacheMachine(object):
         try:
             while True:
                 obj = next(iterator)
-                obj.from_cache = False
-                to_cache.append(obj)
+                if hasattr(obj, 'from_cache'):
+                    obj.from_cache = False
+                    to_cache.append(obj)
+                else:
+                    to_cache = None
                 yield obj
         except StopIteration:
-            if to_cache or config.CACHE_EMPTY_QUERYSETS:
+            if to_cache is not None and (to_cache or config.CACHE_EMPTY_QUERYSETS):
                 self.cache_objects(to_cache, query_key)
             raise
 
